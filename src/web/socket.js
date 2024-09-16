@@ -1,6 +1,7 @@
 const socket = require('socket.io');
 const express = require('express');
 const { addGame, Game } = require('../games/game');
+const game = require('../games/game');
 
 module.exports = (server, sessionSystem) => {
     console.log('📨 Socket.io ready');
@@ -33,6 +34,19 @@ module.exports = (server, sessionSystem) => {
             addGame(game);
 
             io.emit('game link', game);
+        });
+
+        socket.on('game delete', (msg) => {
+            if(username == "admin") {
+                io.emit('game delete', msg);
+                game.delGame(msg);
+            }
+        });
+
+        socket.on('admin prof', (msg) => {
+            if(username == "admin") {
+                io.emit('admin prof', msg);
+            }
         });
 
         socket.on('disconnect', () => {

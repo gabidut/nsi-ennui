@@ -149,6 +149,12 @@
                         <%= req.session.user %>
                     </p>
                 </div>
+                <% if (req.session.user === "admin") { %>
+                    <div class="fixed-admin">
+                        <span class="material-symbols-outlined" style="color: red; cursor: pointer;"
+                            onclick="socket.emit('admin prof');">admin_panel_settings</span>
+                    </div>
+                <% } %>
                 <div class="scisor">
                     <div class="games">
                         <div class="games-input">
@@ -157,10 +163,13 @@
                         </div>
                         <div class="game-list">
                             <% for (game in games) { %>
-                                <div class="game">
+                                <div class="game" link="<%= games[game].link %>">
                                     <p class="game-name"><%= games[game].name %></p>
                                     <img src="<%= games[game].icon %>" alt="" class="img">
-                                    <a href="<%= games[game].link %>" class="join">REJOINDRE</a>
+                                    <span link="<%= games[game].link %>" class="join">REJOINDRE</span>
+                                    <span class="material-symbols-outlined" style="color: red; cursor: pointer;"
+                                        onclick="socket.emit('game delete', `<%= games[game].link %>`);">delete</span>
+
                                 </div>
                             <% } %>
                         </div>
@@ -253,6 +262,7 @@
         const gameList = document.querySelector(".game-list");
         const game = document.createElement("div");
         game.classList.add("game");
+        game.setAttribute("link", msg["link"]);
         const gameName = document.createElement("p");
         gameName.classList.add("game-name");
         gameName.innerText = msg["name"];
@@ -260,14 +270,58 @@
         img.src = msg["icon"];
         img.alt = "";
         img.classList.add("img");
-        const join = document.createElement("a");
-        join.href = msg["link"];
+        const join = document.createElement("span");
+        join.setAttribute("link", msg["link"]);
         join.classList.add("join");
         join.innerText = "REJOINDRE";
         game.appendChild(gameName);
         game.appendChild(img);
         game.appendChild(join);
         gameList.appendChild(game);
+
+        // dlete icon
+        const deleteIcon = document.createElement("span");
+        deleteIcon.classList.add("material-symbols-outlined");
+        deleteIcon.innerText = "delete";
+        deleteIcon.style.color = "red";
+        deleteIcon.style.cursor = "pointer";
+        deleteIcon.onclick = () => {
+            socket.emit("game delete", msg.link);
+        }
+        game.appendChild(deleteIcon);
+
+
+    });
+
+    socket.on('game delete', (msg) => {
+        const chatLogs = document.querySelector(".chat-logs");
+        const chatLog = document.createElement("p");
+        chatLog.style.color = "yellow"
+        chatLog.classList.add("chatlog");
+        chatLog.innerText = "[JEU SUPPRIMÉ] " + msg;
+        chatLogs.appendChild(chatLog);
+
+        const gameList = document.querySelector(".game-list");
+        const games = gameList.querySelectorAll(".game");
+        for (let i = 0; i < games.length; i++) {
+            if (games[i].getAttribute("link") === msg) {
+                gameList.removeChild(games[i]);
+            }
+        }
+    });
+
+    document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("join")) {
+            window.open(e.target.getAttribute("link"), "_blank");
+        }
+    });
+
+    socket.on("admin prof", () => {
+        const chatLogs = document.querySelector(".chat-logs");
+        chatLogs.innerHTML = "";
+        const gameList = document.querySelector(".game-list");
+        gameList.innerHTML = "";
+        window.open("https://m-co.lesformateurslibres.fr/mod/forum/view.php?id=18262", "_blank", "fullscreen=yes");
 
     });
 

@@ -40,7 +40,7 @@ router.post('/login', (req, res) => {
         }
     }
 
-    req.session.user = req.body.username == "admin" ? "pasadmin" : req.body.username;
+    req.session.user = req.body.username == "admin" ? "pasadmin" : req.body.username.substring(0, 10);
 
     res.json({
         success: true,

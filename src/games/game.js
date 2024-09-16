@@ -20,6 +20,13 @@ module.exports = {
         fs.writeFileSync('games.json', JSON.stringify(games, null, 2));
     },
 
+    delGame: (game) => {
+        let games = JSON.parse(fs.readFileSync('games.json'));
+        games = games.filter(g => g.link !== game
+        );
+        fs.writeFileSync('games.json', JSON.stringify(games, null, 2));
+    },
+
     getRecentGames: () => {
         let games = JSON.parse(fs.readFileSync('games.json'));
         games.sort((a, b) => {
